@@ -1,11 +1,17 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import config from "../config/config";
 export default function Login() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -14,9 +20,37 @@ export default function Login() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login submitted:", formData);
+
+    try {
+      setLoading(true);
+      if (!formData.email || !formData.password) {
+        Swal.fire({
+          icon: "error",
+          title: "Please fill all required fields!",
+          showConfirmButton: true,
+          customClass: {
+            confirmButton: "bg-[#e87318] text-white hover:bg-orange-700",
+          },
+        });
+        return;
+      } else {
+        const response = await axios.post(`${config.apiUrl}/login/`, formData);
+        localStorage.setItem("authToken", response.data.token); 
+        navigate('/');
+      }
+    } catch (error) {
+      console.error(error);
+      setError(true);
+    } finally {
+      setFormData({
+        email: "",
+        password: "",
+      });
+      setError(false);
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,24 +87,38 @@ export default function Login() {
             >
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-              placeholder="Enter your password"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+                placeholder="Enter your password"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-gray-400"
+              >
+                {showPassword ? (
+                  <i className="fa fa-eye-slash"></i>
+                ) : (
+                  <i className="fa fa-eye"></i>
+                )}
+              </button>
+            </div>
           </div>
 
           <button
+            disabled={loading}
             type="submit"
             className="w-full py-3 px-4 rounded-lg font-semibold text-white transition duration-300 hover:opacity-90"
             style={{ backgroundColor: "#2898f6" }}
           >
-            Login
+            {loading ? "Logining" : "Login"}
           </button>
         </form>
 

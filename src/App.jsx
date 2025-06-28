@@ -4,6 +4,8 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Navbar from "./components/navbar/Navbar";
+import 'font-awesome/css/font-awesome.min.css';
+import Swal from 'sweetalert2';
 
 function App() {
  

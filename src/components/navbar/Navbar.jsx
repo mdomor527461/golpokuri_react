@@ -9,7 +9,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-[#fff7e6] shadow-md px-4 py-3 md:px-10 relative z-50">
-      <div className="hidden md:grid grid-cols-3 items-center">
+      <div className="hidden md:flex justify-between items-center">
         {/* Left: Logo */}
         <div className="flex justify-start">
           <Logo />
@@ -21,7 +21,7 @@ export default function Navbar() {
         </div>
 
         {/* Right: Nav Items */}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-center items-center">
           <NavItem />
         </div>
       </div>
