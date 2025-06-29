@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
 import config from "../../config/config";
+import Swal from "sweetalert2";
 export default function NavItem() {
   const navigate = useNavigate();
   const handleLogout = async () => {
@@ -24,6 +25,22 @@ export default function NavItem() {
     } catch (error) {
       console.error("Error during logout:", error);
     }
+  };
+
+  const handleLogoutClick = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, logout",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handleLogout(); // Call your logout function
+      }
+    });
   };
   return (
     <ul className="flex flex-col md:flex-row gap-4 md:gap-8 text-lg font-semibold text-[#1a1a1a]">
@@ -63,7 +80,7 @@ export default function NavItem() {
           Post Story
         </NavLink>
       </li>
-      <li className="nav-item">
+      {localStorage.getItem('authToken') ? <li className="nav-item">
         <NavLink
           to="/post-story"
           className={({ isActive }) =>
@@ -74,13 +91,13 @@ export default function NavItem() {
         >
           Dashboard
         </NavLink>
-      </li>
+      </li> : ''}
 
       {localStorage.getItem("authToken") ? (
         <li className="nav-item">
           <span
             className="hover:text-red-500 transition duration-300"
-            onClick={handleLogout}
+            onClick={handleLogoutClick}
           >
             Logout
           </span>
