@@ -1,6 +1,13 @@
 import { StarIcon } from "@heroicons/react/20/solid";
+import { useNavigate } from "react-router-dom";
 
-export default function Story({ image_url, title, content, review }) {
+export default function Story({id, image_url, title, content, review ,category_name}) {
+  const navigate = useNavigate();
+  const handleRedirect = (id)=>{
+    const token = localStorage.getItem("authToken");
+    token ? navigate(`story_details/${id}`) : navigate('/login')
+  }
+
   const stars = Array(5)
     .fill(0)
     .map((_, i) => (
@@ -23,13 +30,13 @@ export default function Story({ image_url, title, content, review }) {
         {title.slice(0, 20)}
         {title.length > 20 && "..."}
       </h3>
-      <div className="flex justify-start gap-1 my-2">{stars}</div>
+      <div className="flex justify-between gap-1 my-2 items-center"><span className="flex">{stars}</span> <span className="text-orange-600 text-decoration-line: underline cursor-pointer text-md md:text-lg">{category_name}</span></div>
       <p className="text-sm text-gray-600 whitespace-pre-line text-left">
         {content.slice(0, 40)}
         {content.length > 40 && "..."}
       </p>
 
-      <p className="text-orange-600 font-bold mt-2 hover:underline cursor-pointer text-left">
+      <p className="text-orange-600 font-bold mt-2 hover:underline cursor-pointer text-left" onClick={()=>handleRedirect(id)}>
         Read more
       </p>
     </div>
