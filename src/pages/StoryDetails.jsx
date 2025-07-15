@@ -9,6 +9,8 @@ import StoryHeader from "../components/story/StoryHeader";
 import StoryContent from "../components/story/StoryContents";
 import StoryProgress from "../components/story/StoryProgress";
 import StoryInteractions from "../components/story/StoryInteractions";
+import ShowReactorsModal from "../components/modals/ShowReactorsModal";
+
 
 export default function StoryDetails() {
   const { id } = useParams();
@@ -20,19 +22,88 @@ export default function StoryDetails() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
+  const token = localStorage.getItem("authToken");
+  const [isOpen, setIsOpen] = useState(false);
+  const [reactData, setReactData] = useState({
+    story: "",
+    type: "",
+  });
 
-  const handleLike = (isLiked) => {
-    setLiked(isLiked);
-    // Here you can also make an API call to update the like status on the server
-    // updateLikeStatus(story.id, isLiked);
+  const openModal = () => setIsOpen(true);
+  const closeModal = () => setIsOpen(false);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+  const fetchStoryDetails = async () => {
+    try {
+      const response = await axios.get(`${config.apiUrl}/story/stories/${id}`, {
+        headers: {
+          Authorization: `Token ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      // console.log(response.data);
+      setStory(response.data);
+      setReactData({
+        story: response.data.id,
+        type: "love",
+      });
+      // Set initial values from API response
+      setLiked(response.data.user_reaction || false);
+      setLikeCount(response.data.all_user_reacts.length || 0);
+      setCommentCount(response.data.commentCount || 0);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching story details:", err);
+      setError("Failed to load story details");
+      setLoading(false);
+
+      if (err.response?.status === 401) {
+        localStorage.removeItem("authToken");
+        navigate("/login");
+      }
+    }
   };
 
   useEffect(() => {
-    const fetchStoryDetails = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
-        const response = await axios.get(
-          `${config.apiUrl}/story/stories/${id}`,
+    fetchStoryDetails();
+  }, [id, navigate]);
+
+  const handleLike = async (isLiked) => {
+    try {
+      setLiked(isLiked);
+
+      if (isLiked) {
+        // React করবো
+        await axios.post(`${config.apiUrl}/story/react/`, reactData, {
+          headers: {
+            Authorization: `Token ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        // React করার পর fresh data আনবো
+        await fetchStoryDetails();
+      } else {
+        // Unlike করার আগে fresh story আনবো, যাতে user_reaction.id নিশ্চিত করা যায়
+        await fetchStoryDetails();
+
+        const reactionId = story?.user_reaction?.id;
+
+        if (!reactionId) {
+          console.warn("No user_reaction id found for delete");
+          return;
+        }
+
+        // এখন safely delete করবো
+        await axios.delete(
+          `${config.apiUrl}/story/react/delete/${reactionId}`,
           {
             headers: {
               Authorization: `Token ${token}`,
@@ -41,26 +112,20 @@ export default function StoryDetails() {
           }
         );
 
-        setStory(response.data);
-        // Set initial values from API response
-        setLiked(response.data.isLiked || false);
-        setLikeCount(response.data.likeCount || 0);
-        setCommentCount(response.data.commentCount || 0);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching story details:", err);
-        setError("Failed to load story details");
-        setLoading(false);
-
-        if (err.response?.status === 401) {
-          localStorage.removeItem("authToken");
-          navigate("/login");
-        }
+        // Delete করার পর আবার fresh data আনবো
+        await fetchStoryDetails();
       }
-    };
+    } catch (error) {
+      console.error(
+        "❌ handleLike error:",
+        error.response?.data || error.message
+      );
+    }
+  };
 
-    fetchStoryDetails();
-  }, [id, navigate]);
+  const showReactors = () => {
+    openModal();
+  };
 
   // Create floating sparkles effect
   useEffect(() => {
@@ -137,8 +202,12 @@ export default function StoryDetails() {
           commentCount={commentCount}
           initialLiked={liked}
           onLike={handleLike}
+          showReactors={showReactors}
         />
+        <ShowReactorsModal story = {story} closeModal={closeModal} isOpen={isOpen}  />
       </div>
+
+    
     </div>
   );
 }

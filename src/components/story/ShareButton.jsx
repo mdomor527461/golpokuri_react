@@ -70,8 +70,8 @@ export default function ShareButton({ storyTitle, storyUrl }) {
         onClick={() => setIsOpen(!isOpen)}
         className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2 border border-gray-100"
       >
-        <ShareIcon className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors duration-300" />
-        <span className="text-sm font-medium text-gray-600 group-hover:text-blue-500 transition-colors duration-300">
+        <ShareIcon className="w-6 h-6 text-gray-400 group-hover:text-orange-500 transition-colors duration-300" />
+        <span className="text-sm font-medium text-gray-600 group-hover:text-orange-500 transition-colors duration-300">
           Share
         </span>
       </button>
