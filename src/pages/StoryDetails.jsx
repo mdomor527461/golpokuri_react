@@ -32,14 +32,7 @@ export default function StoryDetails() {
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
+  
   const fetchStoryDetails = async () => {
     try {
       const response = await axios.get(`${config.apiUrl}/story/stories/${id}`, {

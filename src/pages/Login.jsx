@@ -37,7 +37,8 @@ export default function Login() {
         return;
       } else {
         const response = await axios.post(`${config.apiUrl}/login/`, formData);
-        localStorage.setItem("authToken", response.data.token); 
+        localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("authUserId",response.data.user_id);
         navigate('/');
       }
     } catch (error) {

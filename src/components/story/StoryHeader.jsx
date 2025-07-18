@@ -1,23 +1,71 @@
-import { useState } from "react";
-import {
-  StarIcon,
-  HeartIcon,
-} from "@heroicons/react/20/solid";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-export default function StoryHeader({ story }) {
+import axios from "axios";
+import config from "../../config/config";
+import Swal from "sweetalert2";
 
+export default function StoryHeader({ story }) {
   const navigate = useNavigate();
 
-  const stars = Array(5)
-    .fill(0)
-    .map((_, i) => (
-      <StarIcon
-        key={i}
-        className={`w-6 h-6 transition-all duration-300 transform hover:scale-125 ${
-          i < story.review ? "text-yellow-400 animate-pulse" : "text-gray-300"
-        }`}
-      />
-    ));
+  const [filledStars, setFilledStars] = useState([
+    false,
+    false,
+    false,
+    false,
+    false,
+  ]); // Initialize state for stars
+  const [rateCount, setRateCount] = useState(0); // Initialize rateCount
+
+  const token = localStorage.getItem("authToken");
+  const authUserId = localStorage.getItem("authUserId");
+
+  // Prefill stars based on the `story.user_rating.rating_number` on initial load
+  useEffect(() => {
+    if (story.user_rating && story.user_rating.rating_number) {
+      const ratingNumber = story.user_rating.rating_number;
+      const newFilledStars = Array(5).fill(false); // Reset all stars to false
+      for (let i = 0; i < ratingNumber; i++) {
+        newFilledStars[i] = true; // Mark the stars up to the rating number as filled
+      }
+      setFilledStars(newFilledStars); // Update the stars state
+      setRateCount(ratingNumber); // Set the rate count to the user's rating
+    }
+  }, [story.user_rating]); // Re-run when `story.user_rating` changes
+
+  const toggleStar = (index) => {
+    const newFilledStars = [...filledStars];
+    newFilledStars[index] = !newFilledStars[index];
+    setFilledStars(newFilledStars);
+  };
+
+  useEffect(() => {
+    let trueCount = filledStars.filter((item) => item === true).length;
+    setRateCount(trueCount);
+  }, [filledStars]);
+
+  const handleRating = async () => {
+    try {
+      // Send the updated rating to the backend
+      const response = await axios.post(
+        `${config.apiUrl}/story/rating/`,
+        {
+          rating: rateCount,
+          story: story.id,
+          user: authUserId,
+        },
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      Swal.fire("Success", "Story Rating Updated Successfully");
+    } catch (error) {
+      console.error("Error submitting rating:", error);
+    }
+  };
 
   return (
     <>
@@ -53,10 +101,29 @@ export default function StoryHeader({ story }) {
         </div>
 
         <div className="flex justify-center items-center gap-4 mb-6">
-          <div className="flex gap-1">{stars}</div>
-          <span className="text-orange-700 text-lg font-bold bg-yellow-100 px-4 py-2 rounded-full border-2 border-yellow-300">
-            ({story.review}/5) ⭐
-          </span>
+          <div className="flex gap-1">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <svg
+                key={index}
+                onClick={() => toggleStar(index)}
+                className="w-8 h-12 cursor-pointer transition-colors duration-200 hover:scale-110 transform"
+                viewBox="0 0 24 24"
+                fill={filledStars[index] ? "#fbbf24" : "none"} // yellow if filled, otherwise transparent
+                stroke="#000000"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
+              </svg>
+            ))}
+          </div>
+          <button
+            onClick={handleRating}
+            className="text-orange-700 text-lg font-bold bg-yellow-100 px-4 py-2 rounded-full border-2 border-yellow-300 cursor-pointer transition-transform transform hover:scale-105 hover:bg-yellow-200"
+          >
+            Rate this story
+          </button>
         </div>
       </div>
     </>

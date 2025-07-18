@@ -6,7 +6,7 @@ export default function Story({
   image_url,
   title,
   content,
-  review,
+  average_rating,
   category_name,
   read_count,
 }) {
@@ -22,10 +22,11 @@ export default function Story({
       <StarIcon
         key={i}
         className={`w-5 h-5 ${
-          i < review ? "text-yellow-400" : "text-gray-300"
+          i < average_rating ? "text-yellow-400" : "text-gray-300"
         }`}
       />
     ));
+  
 
   return (
     <div className="bg-white shadow-lg rounded-xl p-4 text-center animate-pop-in hover:scale-[1.03] transition-all duration-300">
