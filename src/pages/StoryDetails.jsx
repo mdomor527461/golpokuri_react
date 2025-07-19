@@ -10,6 +10,7 @@ import StoryContent from "../components/story/StoryContents";
 import StoryProgress from "../components/story/StoryProgress";
 import StoryInteractions from "../components/story/StoryInteractions";
 import ShowReactorsModal from "../components/modals/ShowReactorsModal";
+import ShowCommentModal from "../components/modals/ShowCommentModal";
 
 
 export default function StoryDetails() {
@@ -24,6 +25,7 @@ export default function StoryDetails() {
   const [commentCount, setCommentCount] = useState(0);
   const token = localStorage.getItem("authToken");
   const [isOpen, setIsOpen] = useState(false);
+  const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [reactData, setReactData] = useState({
     story: "",
     type: "",
@@ -31,6 +33,8 @@ export default function StoryDetails() {
 
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
+  const openCommentModal = () => setIsCommentModalOpen(true);
+  const closeCommentModal = () => setIsCommentModalOpen(false);
 
   
   const fetchStoryDetails = async () => {
@@ -120,6 +124,10 @@ export default function StoryDetails() {
     openModal();
   };
 
+  const showCommentModal = () => {
+    openCommentModal();
+  };
+
   // Create floating sparkles effect
   useEffect(() => {
     const createSparkle = () => {
@@ -178,7 +186,7 @@ export default function StoryDetails() {
         ></div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8 relative z-10">
+      <div className="max-w-4xl mx-auto px-4 py-8  z-10">
         {/* Header */}
         <StoryHeader story={story} />
 
@@ -196,8 +204,10 @@ export default function StoryDetails() {
           initialLiked={liked}
           onLike={handleLike}
           showReactors={showReactors}
+          showCommentModal={showCommentModal}
         />
         <ShowReactorsModal story = {story} closeModal={closeModal} isOpen={isOpen}  />
+        <ShowCommentModal story={story} closeCommentModal={closeCommentModal} isCommentModalOpen={isCommentModalOpen} />
       </div>
 
     

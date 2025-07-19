@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { HeartIcon } from "@heroicons/react/20/solid";
 import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
-import axios from "axios";
-import config from "../../config/config";
+
 export default function LikeButton({
   initialLiked = false,
   likeCount = 0,
@@ -26,11 +25,11 @@ export default function LikeButton({
   };
 
   return (
-    <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2 border border-gray-100 mx-5">
+    <div className="flex justify-center items-center gap-2">
       <button className="relative" onClick={handleLike}>
         {liked ? (
           <HeartIcon
-            className={`w-6 h-6 text-red-500 ${
+            className={`w-8 h-8 text-red-500 ${
               isAnimating ? "animate-bounce scale-125" : ""
             } transition-all duration-300`}
           />
@@ -55,7 +54,7 @@ export default function LikeButton({
       </button>
 
       <button onClick={showReactors}
-        className={`text-sm font-medium transition-colors duration-300 ${
+        className={`text-lg font-medium transition-colors duration-300 ${
           liked ? "text-red-500" : "text-gray-600 group-hover:text-red-400"
         }`}
       >
